@@ -211,7 +211,7 @@ struct sem_rec *exprs(struct sem_rec *l, struct sem_rec *e)
  * fhead - beginning of function body
  */
 void fhead(struct id_entry *p)
-{
+{	//print "func \name\ "
    fprintf(stderr, "sem: fhead not implemented\n");
 }
 
