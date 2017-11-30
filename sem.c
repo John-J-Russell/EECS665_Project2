@@ -88,7 +88,7 @@ struct sem_rec *call(char *f, struct sem_rec *args)
 		
 	}
 	
-	printf("t%d := global %s", current->s_place, f);
+	printf("t%d := global %s\n", current->s_place, f);
 	return(current);
 	
 }
@@ -306,7 +306,7 @@ void fhead(struct id_entry *p)
 	localnum = 0;
 	formalnum = 0;
 	
-   fprintf(stderr, "sem: fhead not implemented\n");
+   //fprintf(stderr, "sem: fhead not implemented\n");
 }
 
 /*
@@ -529,7 +529,7 @@ void startloopscope()
  */
 struct sem_rec *string(char *s)
 {
-   fprintf(stderr, "sem: string not implemented\n");
+   //fprintf(stderr, "sem: string not implemented\n");
    
    //node(0,0,0,0) generates a sem_rec we can fill ourselves.
    struct sem_rec* my_srec = node(0,0,0,0);
