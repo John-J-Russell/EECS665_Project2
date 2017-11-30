@@ -320,7 +320,7 @@ struct id_entry *fname(int t, char *id)
 	printf("func %s \n", id); //TODO: IDK
 	
 	struct id_entry* p;
-	if((p = lookup(x, 0)) == NULL))
+	if((p = lookup(id, 0)) == NULL)
 	{
 		//make a new thing for the function, install in table.
 		//node's arguments: , , link (c), false list (d)
@@ -413,7 +413,7 @@ int m()
    numlabels++;
    printf("label L%d", numlabels);
    
-   return (numlables);
+   return (numlabels);
 }
 
 /*
@@ -442,7 +442,7 @@ struct sem_rec *op1(char *op, struct sem_rec *y)
 	//struct sem_rec* result = node(0,0,0,0);
 	//result->s_place = nexttemp();
 	
-    return (gen(op, (struct sem_rec *) NULL, y, y->mode) );
+    return (gen(op, (struct sem_rec *) NULL, y, y->s_mode) );
   }
 }
 
