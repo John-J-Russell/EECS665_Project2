@@ -537,7 +537,7 @@ struct sem_rec *string(char *s)
    my_srec->s_place = nexttemp();
    my_srec->s_mode = T_STR;
    
-   
+   printf("t%d := \"%s\"", my_srec->s_place, s);
    return (my_srec);
 }
 
