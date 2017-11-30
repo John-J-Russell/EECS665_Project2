@@ -37,8 +37,60 @@ void bgnstmt()
  */
 struct sem_rec *call(char *f, struct sem_rec *args)
 {
-   fprintf(stderr, "sem: call not implemented\n");
-   return ((struct sem_rec *) NULL);
+   //fprintf(stderr, "sem: call not implemented\n");
+   //return ((struct sem_rec *) NULL);
+	
+	struct sem_rec* current = args;
+	
+	while(current->back.s_link != NULL)
+	{
+		if(current->s_mode == T_INT)
+		{
+			printf("argi t%d\n", current->s_place);
+		}
+		else if(current->s_mode == T_DOUBLE)
+		{
+			printf("argf t%d\n", current->s_place);
+		}
+		
+		current = current->back.s_link;
+	}
+	//Now on last
+	if(current != NULL)
+	{
+		if(current->s_mode == T_INT)
+		{
+			printf("argi t%d\n", current->s_place);
+		}
+		else if(current->s_mode == T_DOUBLE)
+		{
+			printf("argf t%d\n", current->s_place);
+		}
+	}
+	//use lookup to find function id_entry, build sem_rec from that.
+	struct id_entry* func = lookup(f,0);
+	if(func != NULL)
+	{
+		current = node(0,0,0,0);
+	
+		current->s_place = nexttemp();
+		
+		current->s_mode = func->i_type;
+		
+	}
+	else
+	{
+		current = node(0,0,0,0);
+		current->s_place = nexttemp();
+		current->s_mode = T_INT; //Default assumption.
+		
+		
+		
+	}
+	
+	printf("t%d := global %s", current->s_place, f);
+	return(current);
+	
 }
 
 /*
@@ -203,15 +255,57 @@ void endloopscope(int m)
  */
 struct sem_rec *exprs(struct sem_rec *l, struct sem_rec *e)
 {
-   fprintf(stderr, "sem: exprs not implemented\n");
-   return ((struct sem_rec *) NULL);
+   //fprintf(stderr, "sem: exprs not implemented\n");
+   
+   //l->back.s_link = e;
+   
+   return(merge(l,e));
+   //return ((struct sem_rec *) NULL);
 }
 
 /*
  * fhead - beginning of function body
  */
 void fhead(struct id_entry *p)
-{	//print "func \name\ "
+{	//print "func \name\ " ?
+	//also does formal and localloc? Likely with a for loop or two of 
+	//those global numbers and the type arrays.
+	//Problem: How to initalize those values?
+	//Called after name and arg list is parsed, entering funciton body
+	//
+	
+	int i;
+	for (i = 0; i < formalnum; i++)
+	{
+		//Print out "formal [bytenum]"
+		if(formaltypes[i] == 'i')
+		{
+			printf("formal %d\n", 4);
+		}
+		else
+		{
+			printf("formal %d\n", 8);
+		}
+		
+	}
+	for (i = 0; i < localnum; i++)
+	{
+		//print "localloc [bytenum]"
+		if(localtypes[i] == 'i')
+		{
+			printf("localloc %d\n", 4);
+		}
+		else
+		{
+			printf("localloc %d\n", 8);
+		}
+		
+	}
+	
+	//reset them?
+	localnum = 0;
+	formalnum = 0;
+	
    fprintf(stderr, "sem: fhead not implemented\n");
 }
 
@@ -219,16 +313,47 @@ void fhead(struct id_entry *p)
  * fname - function declaration
  */
 struct id_entry *fname(int t, char *id)
-{
-   fprintf(stderr, "sem: fname not implemented\n");
-   return ((struct id_entry *) NULL);
+{ //t is type, id is name?
+	//type of what? Return argument? Args?
+	//Puts function name into symbol table, initialize formalnum and localnum 
+	//Returns an id_entry, which is a symbol table entry.
+	printf("func %s \n", id); //TODO: IDK
+	
+	struct id_entry* p;
+	if((p = lookup(x, 0)) == NULL))
+	{
+		//make a new thing for the function, install in table.
+		//node's arguments: , , link (c), false list (d)
+		//oor just do 0,0,0,0 and manually assign everything.
+		//we want an id_entry 
+		enterblock();
+		//use install.
+		p = install(id,0); //makes entry with name of id* and at global level.
+		p->i_type = t;
+		p->i_scope = GLOBAL;
+		p->i_defined = 1;
+		
+		return(p);
+		
+		
+	}
+	else
+	{
+		printf("Function already exists, error\n");
+	}
+   //fprintf(stderr, "sem: fname not implemented\n");
+   //return ((struct id_entry *) NULL);
 }
 
 /*
  * ftail - end of function body
  */
 void ftail()
-{
+{	//print "fend", what else?
+	leaveblock();
+	leaveblock();
+	printf("fend\n");
+	
    fprintf(stderr, "sem: ftail not implemented\n");
 }
 
@@ -284,8 +409,11 @@ void labeldcl(char *id)
  */
 int m()
 {
-   fprintf(stderr, "sem: m not implemented\n");
-   return (0);
+   //fprintf(stderr, "sem: m not implemented\n");
+   numlabels++;
+   printf("label L%d", numlabels);
+   
+   return (numlables);
 }
 
 /*
@@ -309,8 +437,12 @@ struct sem_rec *op1(char *op, struct sem_rec *y)
     return (gen(op, (struct sem_rec *) NULL, y, y->s_mode));
   }
   else{
-    fprintf(stderr, "sem: op1 not implemented\n");
-    return ((struct sem_rec *) NULL);
+    //fprintf(stderr, "sem: op1 not implemented\n");
+	
+	//struct sem_rec* result = node(0,0,0,0);
+	//result->s_place = nexttemp();
+	
+    return (gen(op, (struct sem_rec *) NULL, y, y->mode) );
   }
 }
 
@@ -398,7 +530,15 @@ void startloopscope()
 struct sem_rec *string(char *s)
 {
    fprintf(stderr, "sem: string not implemented\n");
-   return ((struct sem_rec *) NULL);
+   
+   //node(0,0,0,0) generates a sem_rec we can fill ourselves.
+   struct sem_rec* my_srec = node(0,0,0,0);
+   
+   my_srec->s_place = nexttemp();
+   my_srec->s_mode = T_STR;
+   
+   
+   return (my_srec);
 }
 
 
