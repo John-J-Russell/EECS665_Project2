@@ -105,12 +105,12 @@ struct sem_rec *call(char *f, struct sem_rec *args)
 	if(result->s_mode == T_INT)
 	{
 		//new temp num,  last temp num, and num of args
-		printf("t%d := fi t%d %d", result->s_place, current->s_place, num_arg);
+		printf("t%d := fi t%d %d\n", result->s_place, current->s_place, num_arg);
 	}
 	else
 	{
 		//Assume float
-		printf("t%d := ff t%d %d", result->s_place, current->s_place, num_arg);
+		printf("t%d := ff t%d %d\n", result->s_place, current->s_place, num_arg);
 	}
 	return(result);
 	
