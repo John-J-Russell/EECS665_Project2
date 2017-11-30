@@ -41,16 +41,18 @@ struct sem_rec *call(char *f, struct sem_rec *args)
    //return ((struct sem_rec *) NULL);
 	
 	struct sem_rec* current = args;
-	
+	int num_arg=0;
 	while(current->back.s_link != NULL)
 	{
 		if(current->s_mode == T_INT)
 		{
 			printf("argi t%d\n", current->s_place);
+			num_arg++;
 		}
 		else if(current->s_mode == T_DOUBLE)
 		{
 			printf("argf t%d\n", current->s_place);
+			num_arg++;
 		}
 		
 		current = current->back.s_link;
@@ -61,10 +63,12 @@ struct sem_rec *call(char *f, struct sem_rec *args)
 		if(current->s_mode == T_INT)
 		{
 			printf("argi t%d\n", current->s_place);
+			num_arg++;
 		}
 		else if(current->s_mode == T_DOUBLE)
 		{
 			printf("argf t%d\n", current->s_place);
+			num_arg++;
 		}
 	}
 	//use lookup to find function id_entry, build sem_rec from that.
@@ -89,7 +93,26 @@ struct sem_rec *call(char *f, struct sem_rec *args)
 	}
 	
 	printf("t%d := global %s\n", current->s_place, f);
-	return(current);
+	
+	
+	//need a print for resturring result, and return should be storing result.
+	
+	struct sem_rec* result = node(0,0,0,0);
+	
+	result->s_place = nexttemp();
+	result->s_mode = current->s_mode;
+	
+	if(result->s_mode == T_INT)
+	{
+		//new temp num,  last temp num, and num of args
+		printf("t%d := fi t%d %d", result->s_place, current->s_place, num_arg);
+	}
+	else
+	{
+		//Assume float
+		printf("t%d := ff t%d %d", result->s_place, current->s_place, num_arg);
+	}
+	return(result);
 	
 }
 
