@@ -354,7 +354,7 @@ void ftail()
 	leaveblock();
 	printf("fend\n");
 	
-   fprintf(stderr, "sem: ftail not implemented\n");
+   //fprintf(stderr, "sem: ftail not implemented\n");
 }
 
 /*
