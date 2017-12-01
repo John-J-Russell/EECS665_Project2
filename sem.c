@@ -253,7 +253,29 @@ void doifelse(struct sem_rec *e, int m1, struct sem_rec *n,
  */
 void doret(struct sem_rec *e)
 {
-   fprintf(stderr, "sem: doret not implemented\n");
+	if(e == NULL)
+	{
+		//IDK
+		//just...generate a new temp w/ value 0, and return that?
+		//int num = nexttemp();
+		//printf("")
+		printf("reti \n");
+	}
+	else
+	{
+		if(e->s_mode == T_INT)
+		{
+			printf("reti t%d\n",e->s_place);
+		}
+		else
+		{
+			//It's a float
+			printf("retf t%d\n",e->s_place);
+			
+		}
+	}
+	return();
+    //fprintf(stderr, "sem: doret not implemented\n");
 }
 
 /*
@@ -474,7 +496,16 @@ struct sem_rec *op1(char *op, struct sem_rec *y)
  */
 struct sem_rec *op2(char *op, struct sem_rec *x, struct sem_rec *y)
 {
-   fprintf(stderr, "sem: op2 not implemented\n");
+	if(x == NULL || y == NULL || op == '\0')
+	{
+		printf("Error, cannot perform operation.\n");
+		return((struct sem_rec*) NULL);
+	}
+	
+	struct sem_rec* p = gen(op, x, y, x->s_mode);
+	
+	return(p);
+   //fprintf(stderr, "sem: op2 not implemented\n");
    return ((struct sem_rec *) NULL);
 }
 
@@ -505,8 +536,21 @@ struct sem_rec *set(char *op, struct sem_rec *x, struct sem_rec *y)
   struct sem_rec *p, *cast_y;
 
   if(*op!='\0' || x==NULL || y==NULL){
-    fprintf(stderr, "sem: set not implemented\n");
-    return((struct sem_rec *) NULL);
+	  //this is an op, but x or y doesn't exist.
+	  //t16 and t17 in example 1.
+	  //this is like i += 1 or w/e.
+	  //use gen()?
+	  //first sem_rec arg NULL, second as assignment?
+	  if(x == NULL)
+	  {
+		  p = gen(op, NULL, y, y->s_mode);
+	  }
+	  else if(y == NULL)
+	  {
+		  p = gen(op, NULL, x, x->s_mode);
+	  }
+    //fprintf(stderr, "sem: set not implemented\n");
+    return(p);
   }
 
   /* if for type consistency of x and y */
