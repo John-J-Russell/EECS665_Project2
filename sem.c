@@ -554,7 +554,33 @@ struct sem_rec *opb(char *op, struct sem_rec *x, struct sem_rec *y)
 struct sem_rec *rel(char *op, struct sem_rec *x, struct sem_rec *y)
 {
    //fprintf(stderr, "sem: rel not implemented\n");
-   return(gen(op,x,y,x->s_mode));
+   //need to generate branching statement.
+   //rel happens at if i == 0
+   //generate a temp storing that resutl,
+   //a branch if true, and a new backpachting lable,
+   //andother branch if false rightr after.
+   
+   //assign those labels to a true list and a false lsit.
+   //make stuff w/ node.
+   
+   struct sem_rec* t_l = node(0,0,0,0); //true list.
+   struct sem_rec* f_l = node(0,0,0,0); //false list
+   struct sem_rec* comparer = gen(op,x,y,x->s_mode);
+   int tr = numblabels + 1;
+   numblabels++;
+   int fl = numblabels + 1;
+   numblabels++;
+   
+   printf("bt t%d B%d\n", comparer->s_place, tr );//branch if true.
+   printf("br B%d\n", fl); //branch if false.
+   
+   t_l->s_place = tr;
+   f_l->s_place = fl;
+   
+   comparer->back.s_true = t_l;
+   comparer->s_false = f_l;
+   
+   return(comparer);
    //return ((struct sem_rec *) NULL);
 }
 
