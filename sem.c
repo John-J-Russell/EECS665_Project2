@@ -501,7 +501,11 @@ struct sem_rec *op2(char *op, struct sem_rec *x, struct sem_rec *y)
 		printf("Error, cannot perform operation.\n");
 		return((struct sem_rec*) NULL);
 	}
-	
+	if(x->s_mode != y->s_mode)
+	{
+		printf("Incompatible types\n");
+		return((struct sem_rec*) NULL);
+	}
 	struct sem_rec* p = gen(op, x, y, x->s_mode);
 	
 	return(p);
