@@ -25,12 +25,11 @@ void backpatch(struct sem_rec *p, int k)
 	while (iterator != NULL)
 	{
 		//bmode = lk
-		printf("B%d = L%d\n", iterator->s_mode, k );
+		printf("B%d = L%d\n", iterator->s_place, k );
 		iterator = iterator->back.s_link;
 	}
-	
-	printf("B%d = L%d\n", iterator->s_mode, k);
-	
+
+
   // fprintf(stderr, "sem: backpatch not implemented\n");
 }
 
@@ -52,7 +51,7 @@ struct sem_rec *call(char *f, struct sem_rec *args)
 {
    //fprintf(stderr, "sem: call not implemented\n");
    //return ((struct sem_rec *) NULL);
-	
+
 	struct sem_rec* current = args;
 	int num_arg=0;
 	while(current->back.s_link != NULL)
@@ -67,7 +66,7 @@ struct sem_rec *call(char *f, struct sem_rec *args)
 			printf("argf t%d\n", current->s_place);
 			num_arg++;
 		}
-		
+
 		current = current->back.s_link;
 	}
 	//Now on last
@@ -89,32 +88,32 @@ struct sem_rec *call(char *f, struct sem_rec *args)
 	if(func != NULL)
 	{
 		current = node(0,0,0,0);
-	
+
 		current->s_place = nexttemp();
-		
+
 		current->s_mode = func->i_type;
-		
+
 	}
 	else
 	{
 		current = node(0,0,0,0);
 		current->s_place = nexttemp();
 		current->s_mode = T_INT; //Default assumption.
-		
-		
-		
+
+
+
 	}
-	
+
 	printf("t%d := global %s\n", current->s_place, f);
-	
-	
+
+
 	//need a print for resturring result, and return should be storing result.
-	
+
 	struct sem_rec* result = node(0,0,0,0);
-	
+
 	result->s_place = nexttemp();
 	result->s_mode = current->s_mode;
-	
+
 	if(result->s_mode == T_INT)
 	{
 		//new temp num,  last temp num, and num of args
@@ -126,7 +125,7 @@ struct sem_rec *call(char *f, struct sem_rec *args)
 		printf("t%d := ff t%d %d\n", result->s_place, current->s_place, num_arg);
 	}
 	return(result);
-	
+
 }
 
 /*
@@ -146,15 +145,15 @@ struct sem_rec *ccexpr(struct sem_rec *e)
    struct sem_rec *t1;
 
    if(e){
-   
+
      t1 = gen("!=", e, cast(con("0"), e->s_mode), e->s_mode);
-     
+
      printf("bt t%d B%d\n", t1->s_place, ++numblabels);
      printf("br B%d\n", ++numblabels);
      return (node(0, 0,
-		  node(numblabels-1, 0, (struct sem_rec *) NULL, 
+		  node(numblabels-1, 0, (struct sem_rec *) NULL,
 		       (struct sem_rec *) NULL),
-		  node(numblabels, 0, (struct sem_rec *) NULL, 
+		  node(numblabels, 0, (struct sem_rec *) NULL,
 		       (struct sem_rec *) NULL)));
    }
    else
@@ -195,8 +194,8 @@ struct sem_rec *con(char *x)
 
   /* print the quad t%d = const */
   printf("t%d = %s\n", nexttemp(), x);
-  
-  /* construct a new node corresponding to this constant generation 
+
+  /* construct a new node corresponding to this constant generation
      into a temporary. This will allow this temporary to be referenced
      in an expression later */
   return(node(currtemp(), p->i_type, (struct sem_rec *) NULL,
@@ -233,7 +232,17 @@ void dodo(int m1, int m2, struct sem_rec *e, int m3)
 void dofor(int m1, struct sem_rec *e2, int m2, struct sem_rec *n1,
            int m3, struct sem_rec *n2, int m4)
 {
-   fprintf(stderr, "sem: dofor not implemented\n");
+	//m1 e true = goto m3, false goto m4.
+	//after m3 part goto n2, then m1.
+
+	//backpatch takes a sem_Rec and and int.
+	backpatch(e2->back.s_true, m3); //if true, perform loop
+	backpatch(e2->s_false, m4); //if false, skip loop.
+
+	backpatch(n1, m1); //iterator to check
+	backpatch(n2, m2); //bottom to iterator
+
+
 }
 
 /*
@@ -249,7 +258,9 @@ void dogoto(char *id)
  */
 void doif(struct sem_rec *e, int m1, int m2)
 {
-   fprintf(stderr, "sem: doif not implemented\n");
+
+	 backpatch(e->back.s_true, m1); //if true enter blcok
+	 backpatch(e->s_false, m2);//else skip block.
 }
 
 /*
@@ -284,7 +295,7 @@ void doret(struct sem_rec *e)
 		{
 			//It's a float
 			printf("retf t%d\n",e->s_place);
-			
+
 		}
 	}
 	//return();
@@ -314,9 +325,9 @@ void endloopscope(int m)
 struct sem_rec *exprs(struct sem_rec *l, struct sem_rec *e)
 {
    //fprintf(stderr, "sem: exprs not implemented\n");
-   
+
    //l->back.s_link = e;
-   
+
    return(merge(l,e));
    //return ((struct sem_rec *) NULL);
 }
@@ -326,12 +337,12 @@ struct sem_rec *exprs(struct sem_rec *l, struct sem_rec *e)
  */
 void fhead(struct id_entry *p)
 {	//print "func \name\ " ?
-	//also does formal and localloc? Likely with a for loop or two of 
+	//also does formal and localloc? Likely with a for loop or two of
 	//those global numbers and the type arrays.
 	//Problem: How to initalize those values?
 	//Called after name and arg list is parsed, entering funciton body
 	//
-	
+
 	int i;
 	for (i = 0; i < formalnum; i++)
 	{
@@ -344,7 +355,7 @@ void fhead(struct id_entry *p)
 		{
 			printf("formal %d\n", 8);
 		}
-		
+
 	}
 	for (i = 0; i < localnum; i++)
 	{
@@ -357,13 +368,13 @@ void fhead(struct id_entry *p)
 		{
 			printf("localloc %d\n", 8);
 		}
-		
+
 	}
-	
+
 	//reset them?
 	localnum = 0;
 	formalnum = 0;
-	
+
    //fprintf(stderr, "sem: fhead not implemented\n");
 }
 
@@ -373,27 +384,27 @@ void fhead(struct id_entry *p)
 struct id_entry *fname(int t, char *id)
 { //t is type, id is name?
 	//type of what? Return argument? Args?
-	//Puts function name into symbol table, initialize formalnum and localnum 
+	//Puts function name into symbol table, initialize formalnum and localnum
 	//Returns an id_entry, which is a symbol table entry.
 	printf("func %s \n", id); //TODO: IDK
-	
+
 	struct id_entry* p;
 	if((p = lookup(id, 0)) == NULL)
 	{
 		//make a new thing for the function, install in table.
 		//node's arguments: , , link (c), false list (d)
 		//oor just do 0,0,0,0 and manually assign everything.
-		//we want an id_entry 
+		//we want an id_entry
 		enterblock();
 		//use install.
 		p = install(id,0); //makes entry with name of id* and at global level.
 		p->i_type = t;
 		p->i_scope = GLOBAL;
 		p->i_defined = 1;
-		
+
 		return(p);
-		
-		
+
+
 	}
 	else
 	{
@@ -411,7 +422,7 @@ void ftail()
 	leaveblock();
 	leaveblock();
 	printf("fend\n");
-	
+
    //fprintf(stderr, "sem: ftail not implemented\n");
 }
 
@@ -470,7 +481,7 @@ int m()
    //fprintf(stderr, "sem: m not implemented\n");
    numlabels++;
    printf("label L%d\n", numlabels);
-   
+
    return (numlabels);
 }
 
@@ -483,15 +494,15 @@ struct sem_rec *n()
 	//create a sem_rec with s_mode of same value
 	int dest = numblabels + 1;
 	numblabels++;
-	
+
 	printf("br B%d\n", dest );
-	
+
 	struct sem_rec* ret_rec = node(0,0,0,0);
 	ret_rec->s_place = dest;
-	
+
 	return(ret_rec);
-	
-	
+
+
    //fprintf(stderr, "sem: n not implemented\n");
    //return ((struct sem_rec *) NULL);
 }
@@ -509,10 +520,10 @@ struct sem_rec *op1(char *op, struct sem_rec *y)
   }
   else{
     //fprintf(stderr, "sem: op1 not implemented\n");
-	
+
 	//struct sem_rec* result = node(0,0,0,0);
 	//result->s_place = nexttemp();
-	
+
     return (gen(op, (struct sem_rec *) NULL, y, y->s_mode) );
   }
 }
@@ -533,7 +544,7 @@ struct sem_rec *op2(char *op, struct sem_rec *x, struct sem_rec *y)
 		return((struct sem_rec*) NULL);
 	}
 	struct sem_rec* p = gen(op, x, y, x->s_mode);
-	
+
 	return(p);
    //fprintf(stderr, "sem: op2 not implemented\n");
    return ((struct sem_rec *) NULL);
@@ -559,28 +570,76 @@ struct sem_rec *rel(char *op, struct sem_rec *x, struct sem_rec *y)
    //generate a temp storing that resutl,
    //a branch if true, and a new backpachting lable,
    //andother branch if false rightr after.
-   
+
    //assign those labels to a true list and a false lsit.
    //make stuff w/ node.
-   
-   struct sem_rec* t_l = node(0,0,0,0); //true list.
-   struct sem_rec* f_l = node(0,0,0,0); //false list
-   struct sem_rec* comparer = gen(op,x,y,x->s_mode);
-   int tr = numblabels + 1;
-   numblabels++;
-   int fl = numblabels + 1;
-   numblabels++;
-   
-   printf("bt t%d B%d\n", comparer->s_place, tr );//branch if true.
-   printf("br B%d\n", fl); //branch if false.
-   
-   t_l->s_place = tr;
-   f_l->s_place = fl;
-   
-   comparer->back.s_true = t_l;
-   comparer->s_false = f_l;
-   
-   return(comparer);
+   if(x->s_mode != y->s_mode)
+	 {
+		 struct sem_rec* temp = node(0,0,0,0);
+		 struct sem_rec* comparer;
+		 if(x->s_mode == T_INT)
+		 {
+			 //convert x to float
+			 //generate a sem_rec for that conversion
+
+			 int new_var = nexttemp();
+			 temp->s_place = new_var;
+			 temp->s_mode = T_DOUBLE;
+
+			 printf("t%d := cvf t%d\n", temp->s_place , x->s_place );
+			 comparer = gen(op,temp,y,temp->s_mode);
+		 }
+		 else
+		 {
+			 //y is an int, convert to float.
+			 int new_var = nexttemp();
+			 temp->s_place = new_var;
+			 temp->s_mode = T_DOUBLE;
+
+			 printf("t%d := cvf t%d\n", temp->s_place , y->s_place );
+			 comparer = gen(op,x,temp,x->s_mode);
+		 }
+		 struct sem_rec* t_l = node(0,0,0,0); //true list.
+	   struct sem_rec* f_l = node(0,0,0,0); //false list
+
+	   int tr = numblabels + 1;
+	   numblabels++;
+	   int fl = numblabels + 1;
+	   numblabels++;
+
+	   printf("bt t%d B%d\n", comparer->s_place, tr );//branch if true.
+	   printf("br B%d\n", fl); //branch if false.
+
+	   t_l->s_place = tr;
+	   f_l->s_place = fl;
+
+	   comparer->back.s_true = t_l;
+	   comparer->s_false = f_l;
+
+	   return(comparer);
+
+	 }
+	 else
+	 {
+	   struct sem_rec* t_l = node(0,0,0,0); //true list.
+	   struct sem_rec* f_l = node(0,0,0,0); //false list
+	   struct sem_rec* comparer = gen(op,x,y,x->s_mode);
+	   int tr = numblabels + 1;
+	   numblabels++;
+	   int fl = numblabels + 1;
+	   numblabels++;
+
+	   printf("bt t%d B%d\n", comparer->s_place, tr );//branch if true.
+	   printf("br B%d\n", fl); //branch if false.
+
+	   t_l->s_place = tr;
+	   f_l->s_place = fl;
+
+	   comparer->back.s_true = t_l;
+	   comparer->s_false = f_l;
+
+	   return(comparer);
+ }
    //return ((struct sem_rec *) NULL);
 }
 
@@ -598,7 +657,25 @@ struct sem_rec *set(char *op, struct sem_rec *x, struct sem_rec *y)
 	  //this is like i += 1 or w/e.
 	  //use gen()?
 	  //first sem_rec arg NULL, second as assignment?
-	  if(x == NULL)
+
+		if(y->s_mode == T_DOUBLE)
+		{
+			//generate quad for grapping value of i from x,
+			//in i += 1, y is the 1.
+			//when genning first quad, stor it temp for usage in 2nd quad.
+			struct sem_rec* temp1 = gen("@", (struct sem_rec*) NULL, x, T_DOUBLE);
+			//temp 1 now holds the variable to be incremented.
+			struct sem_rec* throwaway = gen(op, temp1, y, T_DOUBLE);
+			y = throwaway;
+		}
+		else
+		{
+			struct sem_rec* temp1 = gen("@", (struct sem_rec*) NULL, x, T_INT);
+			struct sem_rec* throwaway = gen(op, temp1, y, T_INT);
+			y = throwaway;
+		}
+
+		if(x == NULL)
 	  {
 		  p = gen(op, NULL, y, y->s_mode);
 	  }
@@ -607,13 +684,13 @@ struct sem_rec *set(char *op, struct sem_rec *x, struct sem_rec *y)
 		  p = gen(op, NULL, x, x->s_mode);
 	  }
     //fprintf(stderr, "sem: set not implemented\n");
-    return(p);
+    //return(p);
   }
 
   /* if for type consistency of x and y */
   cast_y = y;
   if((x->s_mode & T_DOUBLE) && !(y->s_mode & T_DOUBLE)){
-    
+
     /*cast y to a double*/
     printf("t%d = cvf t%d\n", nexttemp(), y->s_place);
     cast_y = node(currtemp(), T_DOUBLE, (struct sem_rec *) NULL,
@@ -629,10 +706,10 @@ struct sem_rec *set(char *op, struct sem_rec *x, struct sem_rec *y)
 
   /*output quad for assignment*/
   if(x->s_mode & T_DOUBLE)
-    printf("t%d := t%d =f t%d\n", nexttemp(), 
+    printf("t%d := t%d =f t%d\n", nexttemp(),
 	   x->s_place, cast_y->s_place);
   else
-    printf("t%d := t%d =i t%d\n", nexttemp(), 
+    printf("t%d := t%d =i t%d\n", nexttemp(),
 	   x->s_place, cast_y->s_place);
 
   /*create a new node to allow just created temporary to be referenced later */
@@ -645,7 +722,8 @@ struct sem_rec *set(char *op, struct sem_rec *x, struct sem_rec *y)
  */
 void startloopscope()
 {
-   fprintf(stderr, "sem: startloopscope not implemented\n");
+		enterblock(); //Maybe?
+		//Prep for a new scope.
 }
 
 /*
@@ -654,13 +732,13 @@ void startloopscope()
 struct sem_rec *string(char *s)
 {
    //fprintf(stderr, "sem: string not implemented\n");
-   
+
    //node(0,0,0,0) generates a sem_rec we can fill ourselves.
    struct sem_rec* my_srec = node(0,0,0,0);
-   
+
    my_srec->s_place = nexttemp();
    my_srec->s_mode = T_STR;
-   
+
    printf("t%d := %s\n", my_srec->s_place, s);
    return (my_srec);
 }
