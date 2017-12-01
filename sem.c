@@ -456,7 +456,7 @@ int m()
 {
    //fprintf(stderr, "sem: m not implemented\n");
    numlabels++;
-   printf("label L%d", numlabels);
+   printf("label L%d\n", numlabels);
    
    return (numlabels);
 }
