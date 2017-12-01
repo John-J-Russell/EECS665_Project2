@@ -18,7 +18,20 @@ int numblabels = 0;                     /* toal backpatch labels in file */
  */
 void backpatch(struct sem_rec *p, int k)
 {
-   fprintf(stderr, "sem: backpatch not implemented\n");
+	//iterate through all sem_rec, andd lable to them.
+	//sem_refc is a list of labels.
+	//k is the label num
+	struct sem_rec* iterator = p;
+	while (iterator != NULL)
+	{
+		//bmode = lk
+		printf("B%d = L%d\n", iterator->s_mode, k );
+		iterator = iterator->back.s_link;
+	}
+	
+	printf("B%d = L%d\n", iterator->s_mode, k);
+	
+  // fprintf(stderr, "sem: backpatch not implemented\n");
 }
 
 /*
@@ -466,8 +479,21 @@ int m()
  */
 struct sem_rec *n()
 {
-   fprintf(stderr, "sem: n not implemented\n");
-   return ((struct sem_rec *) NULL);
+	//print a branch lable
+	//create a sem_rec with s_mode of same value
+	int dest = numblables + 1;
+	numblables++;
+	
+	printf("br B%d", dest );
+	
+	struct sem_rec* ret_rec = node(0,0,0,0);
+	ret_rec->s_place = dest;
+	
+	return(ret_rec);
+	
+	
+   //fprintf(stderr, "sem: n not implemented\n");
+   //return ((struct sem_rec *) NULL);
 }
 
 /*
@@ -527,8 +553,9 @@ struct sem_rec *opb(char *op, struct sem_rec *x, struct sem_rec *y)
  */
 struct sem_rec *rel(char *op, struct sem_rec *x, struct sem_rec *y)
 {
-   fprintf(stderr, "sem: rel not implemented\n");
-   return ((struct sem_rec *) NULL);
+   //fprintf(stderr, "sem: rel not implemented\n");
+   return(gen(op,x,y,x->s_mode));
+   //return ((struct sem_rec *) NULL);
 }
 
 /*
