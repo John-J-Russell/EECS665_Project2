@@ -274,7 +274,7 @@ void doret(struct sem_rec *e)
 			
 		}
 	}
-	return();
+	//return();
     //fprintf(stderr, "sem: doret not implemented\n");
 }
 
