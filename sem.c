@@ -481,10 +481,10 @@ struct sem_rec *n()
 {
 	//print a branch lable
 	//create a sem_rec with s_mode of same value
-	int dest = numblables + 1;
-	numblables++;
+	int dest = numblabels + 1;
+	numblabels++;
 	
-	printf("br B%d", dest );
+	printf("br B%d\n", dest );
 	
 	struct sem_rec* ret_rec = node(0,0,0,0);
 	ret_rec->s_place = dest;
