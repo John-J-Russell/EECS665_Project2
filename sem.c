@@ -336,7 +336,7 @@ void dowhile(int m1, struct sem_rec *e, int m2, struct sem_rec *n,
 void endloopscope(int m)
 {
    //fprintf(stderr, "sem: endloopscope not implemented\n");
-	 exitblock();
+	 leaveblock();
 }
 
 /*
