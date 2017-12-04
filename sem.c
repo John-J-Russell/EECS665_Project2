@@ -133,8 +133,9 @@ struct sem_rec *call(char *f, struct sem_rec *args)
  */
 struct sem_rec *ccand(struct sem_rec *e1, int m, struct sem_rec *e2)
 {
-   fprintf(stderr, "sem: ccand not implemented\n");
-   return ((struct sem_rec *) NULL);
+	//both false lists go to given label.
+	backpatch(e1->s_false, m);
+	backpatch(e2->s_false, m);
 }
 
 /*
@@ -165,8 +166,14 @@ struct sem_rec *ccexpr(struct sem_rec *e)
  */
 struct sem_rec *ccnot(struct sem_rec *e)
 {
-   fprintf(stderr, "sem: ccnot not implemented\n");
-   return ((struct sem_rec *) NULL);
+	//Generate a new sem_rec with reverse of the list of e
+	struct sem_rec* ret = node(0,0,0,0);
+	ret->back.s_true = e->s_false;
+	ret->s_false = e->back.s_true;
+	ret->s_mode = e->s_mode;
+	ret->s_place = e->s_place; //This might be wrong.
+	return(ret);
+	
 }
 
 /*
@@ -174,8 +181,9 @@ struct sem_rec *ccnot(struct sem_rec *e)
  */
 struct sem_rec *ccor(struct sem_rec *e1, int m, struct sem_rec *e2)
 {
-   fprintf(stderr, "sem: ccor not implemented\n");
-   return ((struct sem_rec *) NULL);
+	//Short circuiting, both trues go to same label.
+	backpatch(e1->back.s_true, m);
+	backpatch(e2->back.s_true, m);
 }
 
 /*
@@ -223,7 +231,9 @@ void docontinue()
  */
 void dodo(int m1, int m2, struct sem_rec *e, int m3)
 {
-   fprintf(stderr, "sem: dodo not implemented\n");
+	backpatch(e->back.s_true, m1);
+	backpatch(e->s_false, m3);
+	
 }
 
 /*
@@ -269,7 +279,12 @@ void doif(struct sem_rec *e, int m1, int m2)
 void doifelse(struct sem_rec *e, int m1, struct sem_rec *n,
                          int m2, int m3)
 {
-   fprintf(stderr, "sem: doifelse not implemented\n");
+	backpatch(n, m3);
+	backpatch(e->back.s_true,m1);
+	backpatch(e->s_false,m2);
+	
+	
+   //fprintf(stderr, "sem: doifelse not implemented\n");
 }
 
 /*
@@ -308,7 +323,11 @@ void doret(struct sem_rec *e)
 void dowhile(int m1, struct sem_rec *e, int m2, struct sem_rec *n,
              int m3)
 {
-   fprintf(stderr, "sem: dowhile not implemented\n");
+	backpatch(n,m1);
+	backpatch(e->back.s_true, m2);
+	backpatch(e->s_false,m3);
+	
+   //fprintf(stderr, "sem: dowhile not implemented\n");
 }
 
 /*
@@ -556,8 +575,21 @@ struct sem_rec *op2(char *op, struct sem_rec *x, struct sem_rec *y)
  */
 struct sem_rec *opb(char *op, struct sem_rec *x, struct sem_rec *y)
 {
-   fprintf(stderr, "sem: opb not implemented\n");
-   return ((struct sem_rec *) NULL);
+	//Generate the operation.
+	//Make sure they're the same type, if so gen op.
+	
+	if(x->s_mode == y->s_mode)
+	{
+		struct sem_rec* t = gen(op,x,y,x->s_mode);
+		return(t);
+	}
+	else
+	{
+		printf("Bitwise operation failed: type mismatch.\n");
+		return((struct sem_rec*) NULL);
+	}
+	
+	//Returns a sem_rec pointer.
 }
 
 /*
